@@ -70,9 +70,9 @@ noise_object_size = 0.5  # x: evenly distributed random value in the range [-x c
 noise_size = noise_object_size * pixels_per_centimeter
 
 fourcc = cv2.VideoWriter_fourcc(*'MP42')
-video = cv2.VideoWriter('./pdi.avi', fourcc, float(FPS), (width, height))
+video = cv2.VideoWriter('../results/pdi.avi', fourcc, float(FPS), (width, height))
 
-toast = cv2.imread('toast.png', cv2.IMREAD_UNCHANGED)
+toast = cv2.imread('../images/toast.png', cv2.IMREAD_UNCHANGED)
 toast_resized = cv2.resize(toast, (object_width_px, object_height_px), interpolation=cv2.INTER_AREA)
 
 
