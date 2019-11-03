@@ -1,5 +1,7 @@
+import os
 import cv2
 import numpy as np
+from datetime import datetime
 
 
 def overlay_transparent(background_img, img_to_overlay_t, x, y):
@@ -70,7 +72,8 @@ noise_object_size = 0.5  # x: evenly distributed random value in the range [-x c
 noise_size = noise_object_size * pixels_per_centimeter
 
 fourcc = cv2.VideoWriter_fourcc(*'MP42')
-video = cv2.VideoWriter('../results/pdi.avi', fourcc, float(FPS), (width, height))
+os.makedirs("../results", exist_ok=True)
+video = cv2.VideoWriter('../results/video_' + datetime.now().strftime("%Y%m%d%H%M%S") + '.avi', fourcc, float(FPS), (width, height))
 
 toast = cv2.imread('../images/toast.png', cv2.IMREAD_UNCHANGED)
 toast_resized = cv2.resize(toast, (object_width_px, object_height_px), interpolation=cv2.INTER_AREA)
@@ -111,6 +114,10 @@ def add_object(frame, i, x, j, y):
                                     x2 - x1 + 1)] * frame[y1:y2, x1:(x2 + 1), c])
             else:
                 frame[y1:y2, x1:x2, c] = (alpha_s * toast_resized[:, :, c] + alpha_l * frame[y1:y2, x1:x2, c])
+
+
+def add_background():
+    pass
 
 
 def print_progress_bar(iteration, total, prefix='', suffix='', decimals=1, length=100, fill='█', print_end="\r"):
