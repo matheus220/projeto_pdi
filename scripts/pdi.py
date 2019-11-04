@@ -1,40 +1,44 @@
 import os
 import cv2
+import imutils
 import numpy as np
 from datetime import datetime
 
 
-def overlay_transparent(background_img, img_to_overlay_t, x, y):
-    """
-    @brief      Overlays a transparant PNG onto another image using CV2
-    
-    @param      background_img    The background image
-    @param      img_to_overlay_t  The transparent image to overlay (has alpha channel)
-    @param      x                 x location to place the top-left corner of our overlay
-    @param      y                 y location to place the top-left corner of our overlay
-    
-    @return     Background image with overlay on top
-    """
+def mixture_gaussian():
+    norm_params = np.array([[-20, 1.5],
+                            [0, 0.8],
+                            [20, 1.5]])
+    # Weight of each component, in this case all of them are 1/3
+    weights = [1.0/10.0, 8.0/10.0, 1.0/10.0]
+    # A stream of indices from which to choose the component
+    mixture_id = np.random.choice(len(weights), size=1, replace=True, p=weights)[0]
+    # y is the mixture sample
+    return np.random.normal(*(norm_params[mixture_id]))
 
-    # Extract the alpha mask of the RGBA image, convert to RGB 
-    b, g, r, a = cv2.split(img_to_overlay_t)
-    overlay_color = cv2.merge((b, g, r))
 
-    # Apply some simple filtering to remove edge noise
-    mask = cv2.medianBlur(a, 5)
+def overlay_images(background, image, pos_x, pos_y):
+    bg_w, bg_h, _ = background.shape
+    im_w, im_h, a = image.shape
 
-    h, w, _ = overlay_color.shape
-    roi = background_img[y:y + h, x:x + w]
+    x_min, x_max = max(pos_y, 0), min(pos_y + im_w, bg_w)
+    y_min, y_max = max(pos_x, 0), min(pos_x + im_h, bg_h)
 
-    # Black-out the area behind the logo in our original ROI
-    img1_bg = cv2.bitwise_and(roi.copy(), roi.copy(), mask=cv2.bitwise_not(mask))
+    if x_max < 0 or x_min >= bg_w or y_max < 0 or y_min >= bg_h:
+        return None
 
-    # Mask out the logo from the logo image.
-    img2_fg = cv2.bitwise_and(overlay_color, overlay_color, mask=mask)
+    x_im_min, x_im_max = x_min-pos_y, im_w-(pos_y+im_w-x_max)
+    y_im_min, y_im_max = y_min-pos_x, im_h-(pos_x+im_h-y_max)
 
-    # Update the original image with our new ROI
-    background_img[y:y + h, x:x + w] = cv2.add(img1_bg, img2_fg)
+    if a == 4:
+        alpha_im = image[x_im_min:x_im_max, y_im_min:y_im_max, 3] / 255.0
+        alpha_bg = (1.0 - alpha_im)
 
+        for c in range(0, 3):
+            background[x_min:x_max, y_min:y_max, c] = alpha_im*image[x_im_min:x_im_max, y_im_min:y_im_max, c] \
+                                                      + alpha_bg*background[x_min:x_max, y_min:y_max, c]
+    else:
+        background[x_min:x_max, y_min:y_max] = image[x_im_min:x_im_max, y_im_min:y_im_max]
 
 # All times are in seconds
 # All distances are in centimeters.
@@ -57,7 +61,7 @@ line_positions = range(v_distance_between_lines - object_height_px, height, v_di
 column_positions = range(-(int(np.ceil(width / h_distance_between_columns)) + 3) * h_distance_between_columns,
                          -h_distance_between_columns + 1, h_distance_between_columns)
 FPS = 30
-video_duration = 20  # s
+video_duration = 10  # s
 pixels_shift_per_frame = conveyor_speed_px / FPS
 half_object_width_px = round(object_width_px / 2)  # px
 half_object_height_px = round(object_height_px / 2)  # px
@@ -75,49 +79,35 @@ fourcc = cv2.VideoWriter_fourcc(*'MP42')
 os.makedirs("../results", exist_ok=True)
 video = cv2.VideoWriter('../results/video_' + datetime.now().strftime("%Y%m%d%H%M%S") + '.avi', fourcc, float(FPS), (width, height))
 
-toast = cv2.imread('../images/toast.png', cv2.IMREAD_UNCHANGED)
+bg_pattern = cv2.imread('../images/background/bg2.jpg')
+toast = cv2.imread('../images/toast/toast1.png', cv2.IMREAD_UNCHANGED)
 toast_resized = cv2.resize(toast, (object_width_px, object_height_px), interpolation=cv2.INTER_AREA)
 
+def add_objects(background):
+    for i, x in enumerate(column_positions):
+        for j, y in enumerate(line_positions):
+            i = column_matching[i]
+            if all(object_characteristics[i, j, :] == np.zeros(5)):
+                object_characteristics[i, j, 0] = round(np.random.uniform(-noise_position, noise_position, 1)[0])
+                object_characteristics[i, j, 1] = round(np.random.uniform(-noise_position, noise_position, 1)[0])
+                object_characteristics[i, j, 2] = round(np.random.uniform(-noise_size, noise_size, 1)[0])
+                object_characteristics[i, j, 3] = round(np.random.uniform(-noise_size, noise_size, 1)[0])
+                object_characteristics[i, j, 4] = mixture_gaussian()
 
-def add_object(frame, i, x, j, y):
-    i = column_matching[i]
-    if all(object_characteristics[i, j, :] == np.zeros(5)):
-        object_characteristics[i, j, 0] = round(np.random.uniform(-noise_position, noise_position, 1)[0])
-        object_characteristics[i, j, 1] = round(np.random.uniform(-noise_position, noise_position, 1)[0])
-        object_characteristics[i, j, 2] = round(np.random.uniform(-noise_size, noise_size, 1)[0])
-        object_characteristics[i, j, 3] = round(np.random.uniform(-noise_size, noise_size, 1)[0])
-        object_characteristics[i, j, 4] = np.random.normal(0, 0.05, 1)[0]
+            x += int(object_characteristics[i, j, 0])
+            y += int(object_characteristics[i, j, 1])
+            rotated = imutils.rotate_bound(toast_resized, object_characteristics[i, j, 4])
 
-    x += int(object_characteristics[i, j, 0])
-    y += int(object_characteristics[i, j, 1])
-    y1, y2 = y, y + toast_resized.shape[0]
-    x1, x2 = x, x + toast_resized.shape[1]
-
-    # cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 0), thickness=-1, lineType=8, shift=0)
-    if x2 >= 0 and x1 < width:
-        if x1 < 0:
-            x1 = 0
-        if x2 > width:
-            x2 = width - 1
-        alpha_s = toast_resized[:, :, 3] / 255.0
-        alpha_l = 1.0 - alpha_s
-        for c in range(0, 3):
-            if frame[y1:y2, x1:x2, c].shape != toast_resized[:, :, c].shape:
-                if x1 == 0:
-                    # print(y1, y2)
-                    frame[y1:y2, x1:(x2 + 1), c] = (
-                                alpha_s[:, -(x2 - x1 + 1):] * toast_resized[:, -(x2 - x1 + 1):, c] + alpha_l[:, -(
-                                    x2 - x1 + 1):] * frame[y1:y2, x1:(x2 + 1), c])
-                elif x2 == (width - 1):
-                    frame[y1:y2, x1:(x2 + 1), c] = (
-                                alpha_s[:, :(x2 - x1 + 1)] * toast_resized[:, :(x2 - x1 + 1), c] + alpha_l[:, :(
-                                    x2 - x1 + 1)] * frame[y1:y2, x1:(x2 + 1), c])
-            else:
-                frame[y1:y2, x1:x2, c] = (alpha_s * toast_resized[:, :, c] + alpha_l * frame[y1:y2, x1:x2, c])
+            overlay_images(background, rotated, x, y)
 
 
-def add_background():
-    pass
+def add_background(background, x_pos):
+    w, h, _ = background.shape
+    bgp_w, bgp_h, _ = bg_pattern.shape
+
+    for i in range(x_pos-bgp_h, h, bgp_h):
+        for j in range(0, w, bgp_w):
+            overlay_images(frame, bg_pattern, i, j)
 
 
 def print_progress_bar(iteration, total, prefix='', suffix='', decimals=1, length=100, fill='█', print_end="\r"):
@@ -131,14 +121,15 @@ def print_progress_bar(iteration, total, prefix='', suffix='', decimals=1, lengt
 
 
 pixels_accumulator = 0.0
+background_shift = 0
 print()
 for f in range(FPS * video_duration):
     progress = round(f / (FPS * video_duration) * 100)
     print_progress_bar(f, FPS * video_duration - 1, prefix='Progress:', suffix='Complete', length=50)
 
     pixels_accumulator += pixels_shift_per_frame
-    if round(pixels_accumulator) >= 1:
-        iteration_shift = round(pixels_accumulator)
+    iteration_shift = round(pixels_accumulator)
+    if iteration_shift >= 1:
         pixels_accumulator -= iteration_shift
         column_positions = list(map(lambda x: x + iteration_shift, column_positions))
         if column_positions[-1] >= int(np.ceil(width / h_distance_between_columns) + 1) * h_distance_between_columns:
@@ -154,9 +145,9 @@ for f in range(FPS * video_duration):
     frame = np.zeros([height, width, 3], dtype=np.uint8)
     frame.fill(255)
 
-    for i, x in enumerate(column_positions):
-        for j, y in enumerate(line_positions):
-            add_object(frame, i, x, j, y)
+    background_shift = (background_shift+iteration_shift)%bg_pattern.shape[1]
+    add_background(frame, background_shift)
+    add_objects(frame)
 
     video.write(frame)
 
