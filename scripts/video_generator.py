@@ -3,7 +3,7 @@ import cv2
 import imutils
 import numpy as np
 import skimage
-import scripts.utils as utils
+import pdiutils
 from datetime import datetime
 
 np.random.seed(0x5eed)
@@ -92,7 +92,7 @@ def add_objects(background, x_pos, bg_limit):
                 _object_characteristics[i, j, 1] = round(np.random.uniform(-_noise_position, _noise_position, 1)[0])
                 _object_characteristics[i, j, 2] = round(np.random.uniform(-_noise_size, _noise_size, 1)[0])
                 _object_characteristics[i, j, 3] = round(np.random.uniform(-_noise_size, _noise_size, 1)[0])
-                _object_characteristics[i, j, 4] = utils.mixture_gaussian(norm_params, norm_weights)
+                _object_characteristics[i, j, 4] = pdiutils.mixture_gaussian(norm_params, norm_weights)
                 _object_characteristics[i, j, 5] = np.random.choice(range(len(_object_variations)), p=flip_probability)
 
             chosen_object = _object_variations[int(_object_characteristics[i, j, 5])]
@@ -108,7 +108,7 @@ def add_objects(background, x_pos, bg_limit):
             x = x - dx + int(_object_characteristics[i, j, 0])
             y = y - dy + int(_object_characteristics[i, j, 1])
 
-            utils.overlay_images(background, obj_rotated, x, y)
+            pdiutils.overlay_images(background, obj_rotated, x, y)
 
 
 def add_background(background, x_pos):
@@ -117,7 +117,7 @@ def add_background(background, x_pos):
 
     for i in range(x_pos-bgp_h, h, bgp_h):
         for j in range(0, w, bgp_w):
-            utils.overlay_images(background, _bg_pattern, i, j)
+            pdiutils.overlay_images(background, _bg_pattern, i, j)
 
 
 def save_parameters():
@@ -144,7 +144,7 @@ save_parameters()
 # Loop to create each video frame
 for f in range(fps * video_duration):
     # Show progress bar on console
-    utils.print_progress_bar(f, fps * video_duration - 1, prefix='Progress:', suffix='Complete', length=70)
+    pdiutils.print_progress_bar(f, fps * video_duration - 1, prefix='Progress:', suffix='Complete', length=70)
 
     # Calculate objects shift in current frame
     _pixels_accumulator += _pixels_shift_per_frame
