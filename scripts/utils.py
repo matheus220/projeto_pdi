@@ -1,5 +1,4 @@
 import numpy as np
-
 np.random.seed(0x5eed)
 
 
