@@ -95,14 +95,15 @@ def add_objects(background, x_pos, bg_limit):
                 _object_characteristics[i, j, 4] = utils.mixture_gaussian(norm_params, norm_weights)
                 _object_characteristics[i, j, 5] = np.random.choice(range(len(_object_variations)), p=flip_probability)
 
-            object = _object_variations[int(_object_characteristics[i, j, 5])]
-            object = cv2.resize(object,
-                                (_object_width_px + int(_object_characteristics[i, j,2]),
-                                 _object_height_px + int(_object_characteristics[i, j, 3])),
-                                interpolation=cv2.INTER_AREA)
-            obj_rotated = imutils.rotate_bound(object, _object_characteristics[i, j, 4])
-            dx = round((obj_rotated.shape[1] - object.shape[1]) / 2.0)
-            dy = round((obj_rotated.shape[0] - object.shape[0]) / 2.0)
+            chosen_object = _object_variations[int(_object_characteristics[i, j, 5])]
+            object_ = cv2.resize(chosen_object,
+                                 (_object_width_px + int(_object_characteristics[i, j, 2]),
+                                  _object_height_px + int(_object_characteristics[i, j, 3])),
+                                 interpolation=cv2.INTER_AREA)
+
+            obj_rotated = imutils.rotate_bound(object_, _object_characteristics[i, j, 4])
+            dx = round((obj_rotated.shape[1] - object_.shape[1]) / 2.0)
+            dy = round((obj_rotated.shape[0] - object_.shape[0]) / 2.0)
 
             x = x - dx + int(_object_characteristics[i, j, 0])
             y = y - dy + int(_object_characteristics[i, j, 1])
