@@ -1,10 +1,10 @@
-import numpy as np
+import os
 import cv2
+import numpy as np
 from queue import Queue
 from threading import Thread
-import time
 from pdiufc import processing, preprocessing, interface
-import os
+
 
 raw_frame_queue = Queue()
 original_frame_queue = Queue()
@@ -65,7 +65,6 @@ while True:
 
     input_video = cv2.VideoCapture(source_name)
     cv2.namedWindow('output', cv2.WINDOW_AUTOSIZE)
-    time.sleep(1)
 
     while(input_video.isOpened()):
         ret, frame = input_video.read()
