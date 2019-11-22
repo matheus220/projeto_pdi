@@ -9,31 +9,39 @@ from pdiufc import processing, preprocessing, interface
 raw_frame_queue = Queue()
 original_frame_queue = Queue()
 preprocessed_frame_queue = Queue()
-processed_frame_queue = Queue()
-web_output_queue = Queue()
+processed_data_queue = Queue()
 
 
 def process_data(processing_function, input_queue, output_queue, auxiliary_queue=None):
     while True:
         input_data = input_queue.get()
 
-        output_data = processing_function(input_data)
+        if auxiliary_queue:
+            auxiliary_input = auxiliary_queue.get()
+            if output_queue:
+                output_data = processing_function(input_data, auxiliary_input)
+                output_queue.put(output_data)
+            else:
+                processing_function(input_data, auxiliary_input)
+        else:
+            if output_queue:
+                output_data = processing_function(input_data)
+                output_queue.put(output_data)
+            else:
+                processing_function(input_data)
 
         input_queue.task_done()
-
-        if output_queue:
-            output_queue.put(output_data)
 
 
 pre_processing_thread = Thread(target=process_data, args=(preprocessing.process, raw_frame_queue, preprocessed_frame_queue))
 pre_processing_thread.setDaemon(True)
 pre_processing_thread.start()
 
-processing_thread = Thread(target=process_data, args=(processing.process, preprocessed_frame_queue, processed_frame_queue))
+processing_thread = Thread(target=process_data, args=(processing.process, preprocessed_frame_queue, processed_data_queue))
 processing_thread.setDaemon(True)
 processing_thread.start()
 
-interface_thread = Thread(target=process_data, args=(interface.process, processed_frame_queue, None, original_frame_queue))
+interface_thread = Thread(target=process_data, args=(interface.process, processed_data_queue, None, original_frame_queue))
 interface_thread.setDaemon(True)
 interface_thread.start()
 
