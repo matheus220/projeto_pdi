@@ -267,5 +267,5 @@ def velocidade(cm):
 def process(image,alfa):
     global torradas_all
     torradas_all = update_torradas(torradas_all)
-    torradas_all = contorno(teste, alfa, torradas_all)
+    torradas_all = contorno(image, alfa, torradas_all)
     return torradas_all
