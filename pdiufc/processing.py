@@ -19,7 +19,7 @@ xe = 100
 xd = 250
 
 # Parametro usado para saber se deve colocar ou não a torrada na lista, ver eh_nova()
-lim = (xd - xe + 25) #//eu não sei explicar isso... mas só funciona assim
+lim = 20 #//eu não sei explicar isso... mas só funciona assim... tô confiando no Esteves, pq ele pediu =)
 
 # Angulo onde as torradas são consideradas dentro do padrão
 alfa = 0.0
@@ -240,7 +240,7 @@ def contorno(img, alfa, prev_torradas):
             confiavel = eh_confiavel(thresh, cX, cY)
             
             # Verifica se temos uma nova torrada na area de processamento      
-            torrada_nova = eh_nova([cX,cY], prev_torradas)
+            torrada_nova = eh_nova([cX + xe,cY], prev_torradas)
                      
             if(abs(ang) > alfa and confiavel and torrada_nova):     
                                 
