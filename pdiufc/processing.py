@@ -4,9 +4,9 @@ import math
 from fractions import Fraction
 import cv2
 
-#// esta
-# Torrada objeto
-torrada = Torrada()
+#// daqui pra baixo são umas variáveis que são necessárias para o processamento, algumas delas só serão usadas aqui, outras não.
+#// tem-se de ver onde elas ficarão para saber se necessitará ou não explicitar, dentro de uma função, se elas são globais
+#// do jeito que eu testei, que foi com elas assim, e só precisei explicitar, em process(), que "torradas_all" é global
 
 # Dimensões Imagem
 M = 720
@@ -18,10 +18,99 @@ xe = 100
 # Regiao Processamento End
 xd = 250
 
+# Parametro usado para saber se deve colocar ou não a torrada na lista, ver eh_nova()
+lim = (xd - xe + 25) #//eu não sei explicar isso... mas só funciona assim
+
 # Angulo onde as torradas são consideradas dentro do padrão
 alfa = 0.0
+# Velocidade  do vídeo, em pixels/frame, que é fornecida externamente
+vel = 3.46
 # lista com todas as torradas, que será passado para a interface, esta é a variável de retorno da função process()
 torradas_all = []
+
+#// ^ variáveis necessárias para as funções
+
+#Classe para as torradas
+class Torrada:
+    
+    def __init__(self, box=0, angulo=0, centroide=0, vel=3.46):
+        self.box = box
+        self.ang = angulo
+        self.centroide = centroide
+        self.velocidade = vel
+        self.shift = self.calc_shift(vel)
+    
+    def get_box(self):
+        return self.box
+    
+    def get_angulo(self):
+        return self.ang
+    
+    def get_centroide(self):
+        return self.centroide
+    
+    def get_velocidade(self):
+        return self.velocidade
+    
+    def get_shift(self):
+        return self.shift
+    
+    def set_box(self, box):
+        self.box = box
+    
+    def set_centroide(self, centroide):
+        self.centroide = centroide
+    
+    def set_velocidade(self, velocidade):
+        self.velocidade = velocidade
+    
+    def set_shift(self, shift):
+        self.shift = shift
+            
+    def calc_shift(self, velocidade):
+    
+        teto = math.ceil(velocidade)
+        piso = math.floor(velocidade)
+
+        resto = round((velocidade-piso) , 2)
+
+        frac = Fraction(resto).limit_denominator()
+
+        tamanhoProp = frac.denominator  # soma da proporção de nTeto e nPiso
+        nTeto = frac.numerator # proporção do teto(ceil)
+        nPiso = tamanhoProp - nTeto # proporção do piso(floor)
+
+        array_teto = np.ones(nTeto)*teto
+        array_piso = np.ones(nPiso)*piso
+                
+        output = np.ones(array_teto.size + array_piso.size)
+        
+        count_teto = 0
+        count_piso = 0
+        turn_teto = True        
+        
+        # Intercalando os valores do shift
+        for i in range(0,output.size):
+            
+            if count_teto == array_teto.size:
+                output[i] = array_piso[count_piso]
+                count_piso = count_piso + 1
+                
+            elif count_piso == array_piso.size:
+                output[i] = array_teto[count_teto]
+                count_teto = count_teto + 1
+                
+            else:
+                if turn_teto:
+                    output[i] = array_teto[count_teto]
+                    count_teto = count_teto + 1
+                    turn_teto =  False
+                else:
+                    output[i] = array_piso[count_piso]
+                    count_piso = count_piso + 1
+                    turn_teto =  True
+
+        return output
 
 
 # angTor() calcula o angulo de rotação da torrada a partir do Box retornado pela função do OpenCV
@@ -69,7 +158,7 @@ def eh_nova(centroide_atual, torradas):
         
         dist = math.sqrt((centroide[0] - centroide_atual[0])**2 + (centroide[1] - centroide_atual[1])**2)
 
-        if dist < 150:
+        if dist < lim:
             is_nova = False
             break
             
@@ -109,9 +198,9 @@ def update_torradas(all_torradas):
 # porém o objetivo é retornar uma lista com o centro de massa e a rotação das torradas alvo. Go Esteves!
 def contorno(img, alfa, prev_torradas):
     
-    imgG = cv2.cvtColor(img[:,xe:xd:1], cv2.COLOR_BGR2GRAY) 
-    imgR = imgG
-    ret, thresh = cv2.threshold(imgR, 140, 255, 0)
+    imgG = cv2.cvtColor(img[:,xe:xd:1], cv2.COLOR_BGR2GRAY) #// aqui eu faço isso pq atualmente a imagem que recebemos é RGB, caso isso mude para uma imagem já em níveis de cinza
+    imgR = imgG                                             #// cont. apagar as linhas 116 até 118, e substituir , no restante da função contorno
+    ret, thresh = cv2.threshold(imgR, 140, 255, 0)          #// a palavra "thresh" por "img"
     
     # Encontrando contornos da torrada
     contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -162,8 +251,7 @@ def contorno(img, alfa, prev_torradas):
                 box[:,0] = box[:,0] + xe
                                 
                 #Salvando objeto Torrada
-                velocidade = 3.46
-                torrada = Torrada(box, ang, centroide, velocidade)
+                torrada = Torrada(box, ang, centroide, vel)
                 
                 prev_torradas.append(torrada)
     
@@ -176,8 +264,6 @@ def velocidade(cm):
     #// a ideia é pegar ela por meio de uma medição externa, e atualizar a variável global vel
     return vel
 
-# width e height devem ser parametros opcionais, para a área de processamento da imagem, caso não sejam passados,
-# os valores padrão estão definidos abaixo dos imports(para a altura, é toda a imagem) ... ainda falta implementá-los
 def process(image,alfa):
     global torradas_all
     torradas_all = update_torradas(torradas_all)
