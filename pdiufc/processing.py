@@ -18,24 +18,28 @@ xe = 100
 # Regiao Processamento End
 xd = 250
 
-# Parametro usado para saber se deve colocar ou não a torrada na lista, ver eh_nova()
-lim = 20 #//eu não sei explicar isso... mas só funciona assim... tô confiando no Esteves, pq ele pediu =)
-
 # Angulo onde as torradas são consideradas dentro do padrão
 alfa = 0.0
 # Velocidade  do vídeo, em pixels/frame, que é fornecida externamente
 vel = 3.46
+
+#// ^ variáveis necessárias para as funções
+########################################################################################################################################
+#// Variáveis apenas do processamento
+
+# Parametro usado para saber se deve colocar ou não a torrada na lista, ver eh_nova()
+lim = 20 #//eu não sei explicar isso... mas só funciona assim... tô confiando no Esteves, pq ele pediu =)
+
 # lista com todas as torradas, que será passado para a interface, esta é a variável de retorno da função process()
 torradas_all = []
 
-# Nº de torradas totais fora do padrão, nº de torradas atualmente na esteira que estão fora do padrão 
+# Nº de torradas totais fora do padrão
 total_t = 0
 
+# Nº de torradas atualmente na esteira que estão fora do padrão 
 att_t = 0
-
-#// ^ variáveis necessárias para as funções
-
-
+#// ^^ Variáveis apenas do processamento
+########################################################################################################################################
 #Classe para as torradas
 class Torrada:
     
@@ -120,8 +124,7 @@ class Torrada:
                     turn_teto =  True
 
         return output
-
-
+########################################################################################################################################
 # angTor() calcula o angulo de rotação da torrada a partir do Box retornado pela função do OpenCV
 def angTor( Box , Centro, ang):
     angulo = 0
@@ -131,8 +134,7 @@ def angTor( Box , Centro, ang):
     else:
         angulo = ang
     return round(angulo,2)
-
-
+########################################################################################################################################
 # eh_confiavel verifica se na região de processamento tem uma torrada inteira
 def eh_confiavel(img, centroide_x, centroide_y):
      
@@ -171,8 +173,7 @@ def eh_nova(centroide_atual, torradas):
             break
             
     return is_nova
-
-
+########################################################################################################################################
 # Após as torradas serem identificadas e colocadas na lista torradas_all, update_torradas() atualiza elas para manter registro das mesmas
 # até fora da zona de processamento
 def update_torradas(all_torradas):
@@ -199,8 +200,7 @@ def update_torradas(all_torradas):
             torrada.set_centroide(centroide)
 
     return all_torradas
-
-
+########################################################################################################################################
 # contorno() atualmente pega o contorno das torradas alvo ( rotação > alfa) e as destaca na imagem,
 # porém o objetivo é retornar uma lista com o centro de massa e a rotação das torradas alvo. Go Esteves!
 def contorno(img, alfa, prev_torradas):
@@ -259,16 +259,14 @@ def contorno(img, alfa, prev_torradas):
                 prev_torradas.append(torrada)
     
     return prev_torradas
-
-
+########################################################################################################################################
 def velocidade(cm):
     vel = 0
     # falta ser implementada, ela vai ser usada para calcular, periodicamente, a velocidade da esteira
     # Go Pedros !
     #// a ideia é pegar ela por meio de uma medição externa, e atualizar a variável global vel
     return vel
-
-
+########################################################################################################################################
 def process(image):
     global total_t
     global att_t
