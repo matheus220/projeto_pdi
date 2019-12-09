@@ -30,10 +30,11 @@ torradas_all = []
 
 #// ^ variáveis necessárias para as funções
 
+
 #Classe para as torradas
 class Torrada:
     
-    def __init__(self, box=0, angulo=0, centroide=0, vel=3.46):
+    def __init__(self, box=0, angulo=0, centroide=[], vel=3.46):
         self.box = box
         self.ang = angulo
         self.centroide = centroide
@@ -66,6 +67,9 @@ class Torrada:
     
     def set_shift(self, shift):
         self.shift = shift
+
+    def serialize(self):
+        return [self.centroide[0], self.centroide[1], self.ang]
             
     def calc_shift(self, velocidade):
     
@@ -151,8 +155,7 @@ def eh_confiavel(img, centroide_x, centroide_y):
 # Checa se uma torrada é nova, utilizada para saber se é para dar append() em torradas_all
 def eh_nova(centroide_atual, torradas):
     is_nova = True
-    
-    
+
     for torrada in torradas:
         centroide = torrada.get_centroide()
         
@@ -168,11 +171,9 @@ def eh_nova(centroide_atual, torradas):
 # Após as torradas serem identificadas e colocadas na lista torradas_all, update_torradas() atualiza elas para manter registro das mesmas
 # até fora da zona de processamento
 def update_torradas(all_torradas):
-    
-    
     if len(all_torradas) == 0:
         return all_torradas
-    
+
     for torrada in all_torradas:
         box = torrada.get_box()
         centroide = torrada.get_centroide()
@@ -191,19 +192,15 @@ def update_torradas(all_torradas):
         else:
             torrada.set_box(box)
             torrada.set_centroide(centroide)
-    
+
     return all_torradas
+
 
 # contorno() atualmente pega o contorno das torradas alvo ( rotação > alfa) e as destaca na imagem,
 # porém o objetivo é retornar uma lista com o centro de massa e a rotação das torradas alvo. Go Esteves!
 def contorno(img, alfa, prev_torradas):
-    
-    imgG = cv2.cvtColor(img[:,xe:xd:1], cv2.COLOR_BGR2GRAY) #// aqui eu faço isso pq atualmente a imagem que recebemos é RGB, caso isso mude para uma imagem já em níveis de cinza
-    imgR = imgG                                             #// cont. apagar as linhas 116 até 118, e substituir , no restante da função contorno
-    ret, thresh = cv2.threshold(imgR, 140, 255, 0)          #// a palavra "thresh" por "img"
-    
     # Encontrando contornos da torrada
-    contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    contours, hierarchy = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
                  
     num_torradas = len(contours)
     
@@ -237,7 +234,7 @@ def contorno(img, alfa, prev_torradas):
             torrada_height = rect[1][1]
             
             # Verifica se a torrada está totalmente na região de processamento
-            confiavel = eh_confiavel(thresh, cX, cY)
+            confiavel = eh_confiavel(img, cX, cY)
             
             # Verifica se temos uma nova torrada na area de processamento      
             torrada_nova = eh_nova([cX + xe,cY], prev_torradas)
@@ -257,6 +254,7 @@ def contorno(img, alfa, prev_torradas):
     
     return prev_torradas
 
+
 def velocidade(cm):
     vel = 0
     # falta ser implementada, ela vai ser usada para calcular, periodicamente, a velocidade da esteira
@@ -264,8 +262,12 @@ def velocidade(cm):
     #// a ideia é pegar ela por meio de uma medição externa, e atualizar a variável global vel
     return vel
 
-def process(image,alfa):
-    global torradas_all
-    torradas_all = update_torradas(torradas_all)
-    torradas_all = contorno(image, alfa, torradas_all)
-    return torradas_all
+
+def process(image):
+    _torradas_all = update_torradas(torradas_all)
+    _torradas_all = contorno(image, 15, _torradas_all)
+
+    ret = []
+    for t in _torradas_all:
+        ret.append(t.serialize())
+    return ret
