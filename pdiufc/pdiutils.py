@@ -1,5 +1,4 @@
 import numpy as np
-np.random.seed(0x5eed)
 
 
 def mixture_gaussian(norm_params, norm_weights):
