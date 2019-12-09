@@ -28,6 +28,11 @@ vel = 3.46
 # lista com todas as torradas, que será passado para a interface, esta é a variável de retorno da função process()
 torradas_all = []
 
+# Nº de torradas totais fora do padrão, nº de torradas atualmente na esteira que estão fora do padrão 
+total_t = 0
+
+att_t = 0
+
 #// ^ variáveis necessárias para as funções
 
 
@@ -199,6 +204,7 @@ def update_torradas(all_torradas):
 # contorno() atualmente pega o contorno das torradas alvo ( rotação > alfa) e as destaca na imagem,
 # porém o objetivo é retornar uma lista com o centro de massa e a rotação das torradas alvo. Go Esteves!
 def contorno(img, alfa, prev_torradas):
+    global total_t #//necessita saber como ficarão as variáveis, para decidir como vai ficar o código final
     # Encontrando contornos da torrada
     contours, hierarchy = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
                  
@@ -240,7 +246,7 @@ def contorno(img, alfa, prev_torradas):
             torrada_nova = eh_nova([cX + xe,cY], prev_torradas)
                      
             if(abs(ang) > alfa and confiavel and torrada_nova):     
-                                
+                total_t += 1
                 # Salvando centroide calculado
                 centroide = [cX + xe, cY]
                 
@@ -264,10 +270,13 @@ def velocidade(cm):
 
 
 def process(image):
+    global total_t
+    global att_t
     _torradas_all = update_torradas(torradas_all)
     _torradas_all = contorno(image, 15, _torradas_all)
-
+    
+    att_t = len(_torradas_all)
     ret = []
     for t in _torradas_all:
         ret.append(t.serialize())
-    return ret
+    return ret, total_t, att_t
