@@ -2,6 +2,7 @@ import numpy as np
 import math
 from fractions import Fraction
 import cv2
+from values import Values
 
 # // daqui pra baixo são umas variáveis que são necessárias para o processamento, algumas delas só serão usadas aqui, outras não.
 # // tem-se de ver onde elas ficarão para saber se necessitará ou não explicitar, dentro de uma função, se elas são globais
@@ -220,7 +221,7 @@ def contorno(img, alfa, prev_torradas):
     ret, thresh = cv2.threshold(imgR, 140, 255, 0)  # // a palavra "thresh" por "img"
 
     # Encontrando contornos da torrada
-    contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    _, contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
     num_torradas = len(contours)
     # Executando operações para cada torrada inclionada encontrada
@@ -338,17 +339,14 @@ def contorno2(ret, teste, retOriginal, imgOriginal):
             cv2.line(imgOriginal, (xe, int(M * (tor_col - 1) / tor_col)), (xd, int(M * (tor_col - 1) / tor_col)),
                      (0, 255, 0), lineThickness)
 
-        texto_torta = "Tortas = " + str(count_tor_alvo)
-        texto_tela = "Tortas em tela = " + str(count_tor_alvo_tela)
-        texto_tt = "Total = " + str(count_tor_tot)
-        cv2.putText(imgOriginal, texto_torta, (N - 300, M - 10), font, 0.8, (255, 0, 0), 2, cv2.LINE_AA)
-        cv2.putText(imgOriginal, texto_tela, (N - 300, 20), font, 0.8, (0, 255, 0), 2, cv2.LINE_AA)
-        cv2.putText(imgOriginal, "alfa = %d" % alfa, (xe + 10, M - 10), font, 0.8, (255, 0, 255), 2, cv2.LINE_AA)
-        cv2.putText(imgOriginal, texto_tt, (xe + 10, 20), font, 0.8, (0, 255, 0), 2, cv2.LINE_AA)
 
         cv2.line(imgOriginal, (xe, 0), (xe, M), (0, 255, 0), lineThickness)
         cv2.line(imgOriginal, (xd, 0), (xd, M), (0, 255, 0), lineThickness)
         cv2.imshow('rect', imgOriginal)
+        Values.set_toast_value(count_tor_alvo_tela)
+        Values.set_total_count(count_tor_tot)
+        Values.set_toast_count(count_tor_alvo)
+        Values.set_alpha(alfa)
         # print(
         #     "Nº de torradas totais: %d \nNº de torradas na esteira: %d \n ------------------------------------------" % (
         #     count_tor_alvo, count_tor_alvo_tela))

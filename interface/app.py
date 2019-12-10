@@ -23,16 +23,15 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/toastquantity', methods = ['GET'])
+@app.route('/quantity', methods = ['GET'])
 def quantity():
     toastcount = str(Values.get_toast_count())
-    return jsonify(result=toastcount)
-
-
-@app.route('/speed', methods = ['GET'])
-def speed():
-    spd = str(Values.get_speed())
-    return jsonify(result=spd)
+    totalcount= str(Values.get_total_count())
+    alpha = str(Values.get_alpha())
+    toastvalue = str(Values.get_toast_value())
+    speed = str(Values.get_speed())
+    return jsonify(toastCount=toastcount, totalCount=totalcount,
+                   speedValue=speed, alpha=alpha, toastValue=toastvalue)
 
 
 def gen(camera):
