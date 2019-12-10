@@ -2,6 +2,7 @@ from skimage.filters import median
 from skimage.morphology import disk
 from skimage.color import rgb2hsv
 from skimage import exposure
+from scipy.ndimage.morphology import binary_fill_holes
 import cv2
 
 def process(image):
@@ -16,4 +17,7 @@ def process(image):
     gamma = exposure.adjust_gamma(med, 2)
     # LIMIARIZAÇÃO
     ret, t = cv2.threshold(gamma,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+    #PREENCHENDO FALHAS NA TORRADA
+    #x = binary_fill_holes(t,structure=np.ones((3,3)))
+    #return x
     return t 
