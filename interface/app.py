@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 from importlib import import_module
 import os
-from flask import Flask, render_template, Response
+from flask import Flask, render_template, Response, jsonify
+from values import Values
 
 # import camera driver
 # if os.environ.get('CAMERA'):
@@ -20,6 +21,18 @@ app = Flask(__name__)
 def index():
     """Video streaming home page."""
     return render_template('index.html')
+
+
+@app.route('/toastquantity', methods = ['GET'])
+def quantity():
+    toastcount = str(Values.get_toast_count())
+    return jsonify(result=toastcount)
+
+
+@app.route('/speed', methods = ['GET'])
+def speed():
+    spd = str(Values.get_speed())
+    return jsonify(result=spd)
 
 
 def gen(camera):

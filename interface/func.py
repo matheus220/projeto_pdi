@@ -349,7 +349,7 @@ def contorno2(ret, teste, retOriginal, imgOriginal):
         cv2.line(imgOriginal, (xe, 0), (xe, M), (0, 255, 0), lineThickness)
         cv2.line(imgOriginal, (xd, 0), (xd, M), (0, 255, 0), lineThickness)
         cv2.imshow('rect', imgOriginal)
-        print(
-            "Nº de torradas totais: %d \nNº de torradas na esteira: %d \n ------------------------------------------" % (
-            count_tor_alvo, count_tor_alvo_tela))
+        # print(
+        #     "Nº de torradas totais: %d \nNº de torradas na esteira: %d \n ------------------------------------------" % (
+        #     count_tor_alvo, count_tor_alvo_tela))
         return imgOriginal
