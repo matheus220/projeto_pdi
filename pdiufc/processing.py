@@ -1,4 +1,3 @@
-
 import numpy as np
 import math
 from fractions import Fraction
@@ -36,20 +35,30 @@ torradas_all = []
 # Nº de torradas totais fora do padrão
 total_t = 0
 
+count_tor_alvo = 0
+
+# Nº de torradas totais passadas pela esteira
+
+count_tor_tot = 0
+
 # Nº de torradas atualmente na esteira que estão fora do padrão 
 att_t = 0
+
+count_tor_alvo_tela = 0
+
 #// ^^ Variáveis apenas do processamento
 ########################################################################################################################################
 #Classe para as torradas
 class Torrada:
     
-    def __init__(self, box=0, angulo=0, centroide=[], vel=3.46):
+    def __init__(self, box=0, angulo=0, centroide=0, alvo = False, vel=3.46):
         self.box = box
         self.ang = angulo
         self.centroide = centroide
+        self.alvo = alvo
         self.velocidade = vel
         self.shift = self.calc_shift(vel)
-    
+     
     def get_box(self):
         return self.box
     
@@ -59,6 +68,9 @@ class Torrada:
     def get_centroide(self):
         return self.centroide
     
+    def is_alvo(self):
+        return self.alvo
+
     def get_velocidade(self):
         return self.velocidade
     
@@ -79,7 +91,7 @@ class Torrada:
 
     def serialize(self):
         return [self.centroide[0], self.centroide[1], self.ang]
-            
+                   
     def calc_shift(self, velocidade):
     
         teto = math.ceil(velocidade)
@@ -124,6 +136,7 @@ class Torrada:
                     turn_teto =  True
 
         return output
+
 ########################################################################################################################################
 # angTor() calcula o angulo de rotação da torrada a partir do Box retornado pela função do OpenCV
 def angTor( Box , Centro, ang):
@@ -204,7 +217,8 @@ def update_torradas(all_torradas):
 # contorno() atualmente pega o contorno das torradas alvo ( rotação > alfa) e as destaca na imagem,
 # porém o objetivo é retornar uma lista com o centro de massa e a rotação das torradas alvo. Go Esteves!
 def contorno(img, alfa, prev_torradas):
-    global total_t #//necessita saber como ficarão as variáveis, para decidir como vai ficar o código final
+    global count_tor_alvo
+    global count_tor_tot #//necessita saber como ficarão as variáveis, para decidir como vai ficar o código final
     # Encontrando contornos da torrada
     contours, hierarchy = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
                  
@@ -245,8 +259,8 @@ def contorno(img, alfa, prev_torradas):
             # Verifica se temos uma nova torrada na area de processamento      
             torrada_nova = eh_nova([cX + xe,cY], prev_torradas)
                      
-            if(abs(ang) > alfa and confiavel and torrada_nova):     
-                total_t += 1
+            if( confiavel and torrada_nova):     
+                count_tor_tot += 1
                 # Salvando centroide calculado
                 centroide = [cX + xe, cY]
                 
@@ -254,7 +268,11 @@ def contorno(img, alfa, prev_torradas):
                 box[:,0] = box[:,0] + xe
                                 
                 #Salvando objeto Torrada
-                torrada = Torrada(box, ang, centroide, vel)
+                if( abs(ang) > alfa ):
+                    count_tor_alvo += 1
+                    torrada = Torrada(box, ang, centroide, True, vel)
+                else:
+                    torrada = Torrada(box, ang, centroide, False, vel)
                 
                 prev_torradas.append(torrada)
     
@@ -267,14 +285,19 @@ def velocidade(cm):
     #// a ideia é pegar ela por meio de uma medição externa, e atualizar a variável global vel
     return vel
 ########################################################################################################################################
-def process(image):
-    global total_t
-    global att_t
+def process(image):    
+    global torradas_all
+    global alfa
+    global count_tor_alvo
+    global count_tor_alvo_tela
+    global count_tor_tot
     _torradas_all = update_torradas(torradas_all)
-    _torradas_all = contorno(image, 15, _torradas_all)
+    _torradas_all = contorno(image, alfa, _torradas_all)
     
-    att_t = len(_torradas_all)
     ret = []
+    count_tor_alvo_tela = 0
     for t in _torradas_all:
-        ret.append(t.serialize())
-    return ret, total_t, att_t
+        if(t.is_alvo()):
+            count_tor_alvo_tela += 1
+            ret.append(t.serialize())
+    return ret, count_tor_tot, count_tor_alvo, att_t
