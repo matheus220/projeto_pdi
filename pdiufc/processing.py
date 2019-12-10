@@ -33,17 +33,12 @@ lim = 20 #//eu não sei explicar isso... mas só funciona assim... tô confiando
 torradas_all = []
 
 # Nº de torradas totais fora do padrão
-total_t = 0
-
 count_tor_alvo = 0
 
 # Nº de torradas totais passadas pela esteira
-
 count_tor_tot = 0
 
 # Nº de torradas atualmente na esteira que estão fora do padrão 
-att_t = 0
-
 count_tor_alvo_tela = 0
 
 #// ^^ Variáveis apenas do processamento
@@ -300,4 +295,4 @@ def process(image):
         if(t.is_alvo()):
             count_tor_alvo_tela += 1
             ret.append(t.serialize())
-    return ret, count_tor_tot, count_tor_alvo, att_t
+    return ret, count_tor_tot, count_tor_alvo, count_tor_alvo_tela
