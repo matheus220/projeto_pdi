@@ -62,6 +62,7 @@ def angTor2( Box , Centro, ang):
 def contorno2(img, img_original, alfa):
     imgG = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     imgR = imgG[:,xe:xd:1]
+    count = 0
     ret, thresh = cv2.threshold(imgR, 140, 255, 0)
     try:
         _, contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -83,11 +84,11 @@ def contorno2(img, img_original, alfa):
             if(abs(ang) >= alfa and float(rect[1][1] > 50) and float(rect[1][0] > 50)):
                 # 100 é o offset para o contorno ir para o canto certo
                 box[:,0] = box[:,0] + 100
-
+                count = count + 1
                 font = cv2.FONT_HERSHEY_SIMPLEX
                 pos = ( box[0][0], box[0][1] )
                 cv2.putText(img_original,str(ang),pos, font, 0.8,(0,0,255),2,cv2.LINE_AA)
 
                 img = cv2.drawContours(img_original,[box],-1,(0,255,200),2)
 
-    return img
+    return img, count

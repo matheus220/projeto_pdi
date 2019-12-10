@@ -2,6 +2,7 @@ import os
 import cv2
 from base_camera import BaseCamera
 from func import contorno2
+from values import Values
 
 class Camera(BaseCamera):
     video_source = 0
@@ -28,7 +29,8 @@ class Camera(BaseCamera):
         while True:
             ret, frame = camera.read()
             _, frame_original = camera.read()
-            img = contorno2(frame, frame_original, alfa)
+            img, count = contorno2(frame, frame_original, alfa)
+            Values.set_toast_count(count)
             cv2.rectangle(img, (50, 0), (300, 720), (0, 255, 0), 2)
             # cv2.imshow('frame', img)
             if (cv2.waitKey(30) != -1):  # aperta ESC e a janela fecha
