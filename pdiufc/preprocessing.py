@@ -1,14 +1,19 @@
 from skimage.filters import median
 from skimage.morphology import disk
+from skimage.color import rgb2hsv
+from skimage import exposure
 import cv2
 
-def preprocess(image):
+def process(image):
+    
+    #PASSANDO PARA NOVO ESPAÇO DE CORES
+    img = rgb2hsv(image)
     # FILTRO DE MÉDIA PARA BORRAR BACKGROUND
-    blur15 = cv2.blur(image[:,:,1],(10,10))
-    #blur15 = cv2.GaussianBlur(image[:,:,1],(5,5),8)
+    blur15 = cv2.blur(img[:,:,1],(10,10))
+    # FILTRO DE MEDIANA PARA ELIMINAR RUÍDO SAL-E-PIMENTA 
+    med = median(blur15,disk(5))
+    # AJUSTE DE CONSTRASTE
+    gamma = exposure.adjust_gamma(med, 2)
     # LIMIARIZAÇÃO
-    ret,thresh1 = cv2.threshold(blur15,160,255,cv2.THRESH_BINARY)
-    #ret,thresh1 = cv2.threshold(blur15,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
-    # FILTRO DE MEDIANA PARA ELIMINAR RUÍDO SAL-E-PIMENTA RESIDUAL
-    med = median(thresh1, disk(5))
-    return med
+    ret, t = cv2.threshold(gamma,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+    return t 
