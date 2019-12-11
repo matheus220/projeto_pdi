@@ -28,7 +28,7 @@ STATE = {
     'count_tor_tot': 0,
     'count_tor_alvo': 0,
     'count_tor_alvo_tela': 0,
-    'velocity': 8,
+    'velocity': 0,
     'input_video': ['webcam']
 }
 
@@ -164,11 +164,13 @@ async def counter(websocket, _):
                                 data['tam_h'])
                     STATE["active"] = True
                     STATE["video_src"] = data["fonte"]
+                    STATE["velocity"] = 8
                     processing.reset_variaveis()
                 await notify_state()
             elif not data["active"]:
                 with lock_state:
                     STATE["active"] = False
+                    STATE["velocity"] = 0
                 await notify_state()
             else:
                 logging.error("unsupported event: {}", data)
