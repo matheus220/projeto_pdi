@@ -152,6 +152,15 @@
                                                     <input type="text" class="form-control" id="dist" placeholder="distância (cm)" required>
                                                 </div>
                                             </div>
+                                            <div class="form-group col-md-12">
+                                                <div class="input-group input-group-sm">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text" id="resol">Resolução</span>
+                                                    </div>
+                                                    <input type="text" class="form-control" id="resol_w" placeholder="width (px)" required>
+                                                    <input type="text" class="form-control" id="resol_h" placeholder="height (px)" required>
+                                                </div>
+                                            </div>
                                         </div>
                                         <hr style="margin: 2px 0 15px 0">
                                         <strong style="font-size: 13px;">Informações do objeto</strong>
@@ -161,8 +170,8 @@
                                                     <div class="input-group-prepend">
                                                         <span class="input-group-text" id="tam">Tamanho</span>
                                                     </div>
-                                                    <input type="text" class="form-control" id="tam_w" placeholder="width (px)" required>
-                                                    <input type="text" class="form-control" id="tam_h" placeholder="height (px)" required>
+                                                    <input type="text" class="form-control" id="tam_w" placeholder="width (cm)" required>
+                                                    <input type="text" class="form-control" id="tam_h" placeholder="height (cm)" required>
                                                 </div>
                                             </div>
                                         </div>
@@ -187,7 +196,7 @@
             count_tor_tot_no = document.querySelector('.count_tor_tot_no'),
             velocity = document.querySelector('.velocity'),
             video_inputs = document.querySelector('.video_input'),
-            websocket = new WebSocket("ws://127.0.0.1:6789/");
+            websocket = new WebSocket("ws://{{serverIP}}:6789/");
 
         websocket.onmessage = function (event) {
             data = JSON.parse(event.data);
@@ -204,6 +213,10 @@
                         displayOptions += "<option>" + src + "</option>";
                     });
                     video_inputs.innerHTML = displayOptions;
+
+                    if (data.video_src) {
+                        video_inputs.selectedIndex = data.input_video.indexOf(data.video_src);
+                    }
 
                     document.getElementById("fieldset").disabled = data.active;
 
@@ -227,6 +240,8 @@
         var dist = document.getElementById("dist")
         var tam_w = document.getElementById("tam_w")
         var tam_h = document.getElementById("tam_h")
+        var res_w = document.getElementById("resol_w")
+        var res_h = document.getElementById("resol_h")
 
         function inciar() {
 
@@ -238,7 +253,9 @@
                 fps: fps.value,
                 dist: dist.value,
                 tam_w: tam_w.value,
-                tam_h: tam_h.value
+                tam_h: tam_h.value,
+                res_w: res_w.value,
+                res_h: res_h.value
             }
             websocket.send(JSON.stringify(obj));
             return false;

@@ -2,23 +2,12 @@ import numpy as np
 import math
 from fractions import Fraction
 import cv2
+from . import interface
 
 #// daqui pra baixo são umas variáveis que são necessárias para o processamento, algumas delas só serão usadas aqui, outras não.
 #// tem-se de ver onde elas ficarão para saber se necessitará ou não explicitar, dentro de uma função, se elas são globais
 #// do jeito que eu testei, que foi com elas assim, e só precisei explicitar, em process(), que "torradas_all" é global
 
-# Dimensões Imagem
-M = 720
-N = 1280
-
-# Regiao Processamento Start
-xe = 100
-
-# Regiao Processamento End
-xd = 250
-
-# Angulo onde as torradas são consideradas dentro do padrão
-alfa = 0.0
 # Velocidade  do vídeo, em pixels/frame, que é fornecida externamente
 vel = 3.46
 
@@ -40,6 +29,14 @@ count_tor_tot = 0
 
 # Nº de torradas atualmente na esteira que estão fora do padrão 
 count_tor_alvo_tela = 0
+
+
+def reset_variaveis():
+    global torradas_all, count_tor_alvo, count_tor_tot, count_tor_alvo_tela
+    torradas_all = []
+    count_tor_alvo = 0
+    count_tor_tot = 0
+    count_tor_alvo_tela = 0
 
 #// ^^ Variáveis apenas do processamento
 ########################################################################################################################################
@@ -145,7 +142,9 @@ def angTor( Box , Centro, ang):
 ########################################################################################################################################
 # eh_confiavel verifica se na região de processamento tem uma torrada inteira
 def eh_confiavel(img, centroide_x, centroide_y):
-     
+    xe = interface.VM.get_info('xe')
+    xd = interface.VM.get_info('xd')
+
     direita_ok = False
     esquerda_ok = False
     
@@ -212,6 +211,10 @@ def update_torradas(all_torradas):
 # contorno() atualmente pega o contorno das torradas alvo ( rotação > alfa) e as destaca na imagem,
 # porém o objetivo é retornar uma lista com o centro de massa e a rotação das torradas alvo. Go Esteves!
 def contorno(img, alfa, prev_torradas):
+    xe = interface.VM.get_info('xe')
+    obj_w_px = interface.VM.get_info('_object_width_px')
+    obj_h_px = interface.VM.get_info('_object_height_px')
+
     global count_tor_alvo
     global count_tor_tot #//necessita saber como ficarão as variáveis, para decidir como vai ficar o código final
     # Encontrando contornos da torrada
@@ -247,29 +250,30 @@ def contorno(img, alfa, prev_torradas):
             
             torrada_width = rect[1][0]
             torrada_height = rect[1][1]
-            
-            # Verifica se a torrada está totalmente na região de processamento
-            confiavel = eh_confiavel(img, cX, cY)
-            
-            # Verifica se temos uma nova torrada na area de processamento      
-            torrada_nova = eh_nova([cX + xe,cY], prev_torradas)
-                     
-            if( confiavel and torrada_nova):     
-                count_tor_tot += 1
-                # Salvando centroide calculado
-                centroide = [cX + xe, cY]
-                
-                # xe é o offset para o contorno ir para o canto certo
-                box[:,0] = box[:,0] + xe
-                                
-                #Salvando objeto Torrada
-                if( abs(ang) > alfa ):
-                    count_tor_alvo += 1
-                    torrada = Torrada(box, ang, centroide, True, vel)
-                else:
-                    torrada = Torrada(box, ang, centroide, False, vel)
-                
-                prev_torradas.append(torrada)
+
+            if torrada_width > 0.9*min(obj_w_px, obj_h_px):
+                # Verifica se a torrada está totalmente na região de processamento
+                confiavel = eh_confiavel(img, cX, cY)
+
+                # Verifica se temos uma nova torrada na area de processamento
+                torrada_nova = eh_nova([cX + xe,cY], prev_torradas)
+
+                if( confiavel and torrada_nova):
+                    count_tor_tot += 1
+                    # Salvando centroide calculado
+                    centroide = [cX + xe, cY]
+
+                    # xe é o offset para o contorno ir para o canto certo
+                    box[:,0] = box[:,0] + xe
+
+                    #Salvando objeto Torrada
+                    if( abs(ang) > alfa ):
+                        count_tor_alvo += 1
+                        torrada = Torrada(box, ang, centroide, True, vel)
+                    else:
+                        torrada = Torrada(box, ang, centroide, False, vel)
+
+                    prev_torradas.append(torrada)
     
     return prev_torradas
 ########################################################################################################################################
@@ -280,19 +284,25 @@ def velocidade(cm):
     #// a ideia é pegar ela por meio de uma medição externa, e atualizar a variável global vel
     return vel
 ########################################################################################################################################
-def process(image):    
+def process(image):
     global torradas_all
-    global alfa
     global count_tor_alvo
     global count_tor_alvo_tela
     global count_tor_tot
+    alfa = interface.VM.get_info('rotation_threshold')
     _torradas_all = update_torradas(torradas_all)
     _torradas_all = contorno(image, alfa, _torradas_all)
-    
-    ret = []
+
+    tor_alvo = []
     count_tor_alvo_tela = 0
     for t in _torradas_all:
         if(t.is_alvo()):
             count_tor_alvo_tela += 1
-            ret.append(t.serialize())
-    return ret, count_tor_tot, count_tor_alvo, count_tor_alvo_tela
+            tor_alvo.append(t.serialize())
+
+    return {
+        'tor_alvo': tor_alvo,
+        'count_tor_tot': count_tor_tot,
+        'count_tor_alvo': count_tor_alvo,
+        'count_tor_alvo_tela': count_tor_alvo_tela
+    }

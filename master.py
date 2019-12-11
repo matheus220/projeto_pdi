@@ -1,10 +1,9 @@
-import asyncio
 import os
 import cv2
+import asyncio
+import websockets
 from queue import Queue
 from threading import Thread
-
-import websockets
 
 from pdiufc import processing, preprocessing, interface
 
@@ -39,15 +38,18 @@ web_server_thread = Thread(target=interface.launch_web_server)
 web_server_thread.setDaemon(True)
 web_server_thread.start()
 
-pre_processing_thread = Thread(target=process_data, args=(preprocessing.process, raw_frame_queue, preprocessed_frame_queue))
+pre_processing_thread = Thread(target=process_data,
+                               args=(preprocessing.process, raw_frame_queue, preprocessed_frame_queue))
 pre_processing_thread.setDaemon(True)
 pre_processing_thread.start()
 
-processing_thread = Thread(target=process_data, args=(processing.process, preprocessed_frame_queue, processed_data_queue))
+processing_thread = Thread(target=process_data,
+                           args=(processing.process, preprocessed_frame_queue, processed_data_queue))
 processing_thread.setDaemon(True)
 processing_thread.start()
 
-interface_thread = Thread(target=process_data, args=(interface.process, processed_data_queue, None, original_frame_queue))
+interface_thread = Thread(target=process_data,
+                          args=(interface.process, processed_data_queue, None, original_frame_queue))
 interface_thread.setDaemon(True)
 interface_thread.start()
 
@@ -70,10 +72,15 @@ def video_player():
             cv2.waitKey(15)
             continue
         elif source_name:
-            source_name = os.path.join("results", source_name + '.avi')
+            if source_name == 'webcam':
+                source_name = 0
+            else:
+                source_name = os.path.join("results", source_name + '.avi')
             input_video = cv2.VideoCapture(source_name)
+            xe = interface.VM.get_info('xe')
+            xd = interface.VM.get_info('xd')
 
-            while(input_video.isOpened()):
+            while input_video.isOpened():
                 with interface.lock_state:
                     if not interface.STATE['active']:
                         break
@@ -81,19 +88,27 @@ def video_player():
                 ret, frame = input_video.read()
 
                 if ret:
-                    roi = frame[:, 100:250:1]
+                    roi = frame[:, xe:xd:1]
                     raw_frame_queue.put(roi)
                     original_frame_queue.put(frame)
                 else:
                     with interface.lock_state:
                         interface.STATE['active'] = False
-                        interface.STATE['video_src'] = ''
+
+                        loop = asyncio.new_event_loop()
+                        asyncio.set_event_loop(loop)
+                        loop.run_until_complete(interface.notify_state())
+                        loop.close()
                     break
 
                 if cv2.waitKey(33) & 0xFF == ord('q'):
                     with interface.lock_state:
                         interface.STATE['active'] = False
-                        interface.STATE['video_src'] = ''
+
+                        loop = asyncio.new_event_loop()
+                        asyncio.set_event_loop(loop)
+                        loop.run_until_complete(interface.notify_state())
+                        loop.close()
                     break
 
             input_video.release()
@@ -103,6 +118,6 @@ video_player_thread = Thread(target=video_player)
 video_player_thread.setDaemon(True)
 video_player_thread.start()
 
-start_server = websockets.serve(interface.counter, "127.0.0.1", 6789)
+start_server = websockets.serve(interface.counter, "", 6789)
 asyncio.get_event_loop().run_until_complete(start_server)
 asyncio.get_event_loop().run_forever()
