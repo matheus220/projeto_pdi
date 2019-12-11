@@ -37,7 +37,7 @@
                         <div class="card box-shadow">
                             <div class="d-flex justify-content-around">
                                 <div class="website-infos">
-                                    <h2><span class="counter">300</span></h2>
+                                    <h2><span class="counter count_tor_tot">300</span></h2>
                                     <p>Total de torradas</p>
                                 </div>
                                 <div class="website-infos-img">
@@ -50,7 +50,7 @@
                         <div class="card box-shadow">
                             <div class="d-flex justify-content-around">
                                 <div class="website-infos">
-                                    <h2><span class="counter">200</span></h2>
+                                    <h2><span class="counter count_tor_tot_ok">200</span></h2>
                                     <p>Total de corretas</p>
                                 </div>
                                 <div class="website-infos-img">
@@ -63,7 +63,7 @@
                         <div class="card box-shadow">
                             <div class="d-flex justify-content-around">
                                 <div class="website-infos">
-                                    <h2><span class="counter">100</span></h2>
+                                    <h2><span class="counter count_tor_tot_no">100</span></h2>
                                     <p>Total de tortas</p>
                                 </div>
                                 <div class="website-infos-img">
@@ -76,7 +76,7 @@
                         <div class="card box-shadow">
                             <div class="d-flex justify-content-around">
                                 <div class="website-infos">
-                                    <h2><span class="counter">8 cm/s</span></h2>
+                                    <h2><span class="counter velocity">8 cm/s</span></h2>
                                     <p>Velocidade</p>
                                 </div>
                                 <div class="website-infos-img">
@@ -104,9 +104,9 @@
                                         <div class="form-group col-xl-12 col-md-6">
                                             <div class="input-group input-group-sm">
                                                 <div class="input-group-prepend">
-                                                    <span class="input-group-text" id="exampleFormControlSelect1">Fonte</span>
+                                                    <span class="input-group-text" id="video_input">Fonte</span>
                                                 </div>
-                                                <select class="form-control" id="exampleFormControlSelect1">
+                                                <select class="form-control video_input" id="video_input">
                                                     <option>Câmera real</option>
                                                     <option>Simulação 1</option>
                                                     <option>Simulação 2</option>
@@ -181,5 +181,34 @@
 
     <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/jquery-3.4.1.min.js') }}"></script>
+    <script type="text/javascript">
+        var count_tor_tot = document.querySelector('.count_tor_tot'),
+            count_tor_tot_ok = document.querySelector('.count_tor_tot_ok'),
+            count_tor_tot_no = document.querySelector('.count_tor_tot_no'),
+            velocity = document.querySelector('.velocity'),
+            video_inputs = document.querySelector('.video_input'),
+            websocket = new WebSocket("ws://127.0.0.1:6789/");
+
+        websocket.onmessage = function (event) {
+            data = JSON.parse(event.data);
+            switch (data.type) {
+                case 'state':
+                    count_tor_tot.textContent = data.count_tor_tot;
+                    count_tor_tot_ok.textContent = data.count_tor_alvo;
+                    count_tor_tot_no.textContent = data.count_tor_alvo_tela;
+                    velocity.textContent = data.velocity + " cm/s";
+
+                    var displayOptions = "";
+                    
+                    data.input_video.forEach(src => {
+                        displayOptions += "<option>" + src + "</option>";
+                    });
+                    video_inputs.innerHTML = displayOptions;            
+                    break;
+                default:
+                    console.error("unsupported event", data);
+            }
+        };
+    </script>
 
 </body></html>

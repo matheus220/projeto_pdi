@@ -1,10 +1,12 @@
+import asyncio
 import os
 import cv2
-import numpy as np
 from queue import Queue
 from threading import Thread
-from pdiufc import processing, preprocessing, interface
 
+import websockets
+
+from pdiufc import processing, preprocessing, interface
 
 raw_frame_queue = Queue()
 original_frame_queue = Queue()
@@ -32,6 +34,7 @@ def process_data(processing_function, input_queue, output_queue, auxiliary_queue
 
         input_queue.task_done()
 
+
 web_server_thread = Thread(target=interface.launch_web_server)
 web_server_thread.setDaemon(True)
 web_server_thread.start()
@@ -54,6 +57,8 @@ for file in os.listdir("results"):
     if file.endswith(".avi"):
         videos.append(file.split('.')[0])
 
+interface.STATE['input_video'] = videos
+'''
 while True:
     print("\n### Available video sources ###")
     for i in range(len(videos)):
@@ -92,3 +97,7 @@ while True:
 
     input_video.release()
     cv2.destroyAllWindows()
+'''
+start_server = websockets.serve(interface.counter, "127.0.0.1", 6789)
+asyncio.get_event_loop().run_until_complete(start_server)
+asyncio.get_event_loop().run_forever()
