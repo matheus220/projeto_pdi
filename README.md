@@ -16,24 +16,31 @@
 
 
 ## Contents
-- [1. Introdução](#Introdução)
-  - [1.1 Estudo do Problema](#Estudo-do-Problema)
-  - [1.2 Pipeline da Aplicação](#Pipeline-da-Aplicação)
-- [2. Interface da Aplicação](#Interface-da-Aplicação)
-  - [2.1 Front-End: Apresentação Visual da Interface](#Front-End:-Apresentação-Visual-da-Interface)
-  - [2.2 Back-End: Processamento Interno da Interface](#Back-End:-Processamento-Interno-da-Interface)
-  - [Bibliografia](#Bibliografia)
-- [3. Pré-Processamento dos Vídeos](#Pré-Processamento-dos-Vídeos)
-  - [3.1 Objetivos ](#Objetivos)
-  - [3.2 Metodologia](#Metodologia)
-  - [3.3 Técnicas Utilizadas](#Técnicas-utilizadas)
-  - [3.4 Algoritmos](#Algoritmos)
-  - [3.5 Resultados](#Resultados)
-- [4. Processamento dos Vídeos](#Processamento-dos-Vídeos)
-- [5. Testes e Resultados](#Testes-e-Resultados)
-- [6. Conclusão](#Conclusão)
-- [7. Apêndice A - Listagem das Equipes](#Apêndice-A---Listagem-das-Equipes)
-- [8. Referências](#copyright-and-license)
+- [Contents](#contents)
+- [Introdução](#introdu%c3%a7%c3%a3o)
+- [Estudo do Problema](#estudo-do-problema)
+- [Pipeline da Aplicação](#pipeline-da-aplica%c3%a7%c3%a3o)
+- [Interface da Aplicação](#interface-da-aplica%c3%a7%c3%a3o)
+- [Front-End: Apresentação Visual da Interface](#front-end-apresenta%c3%a7%c3%a3o-visual-da-interface)
+- [Back-End: Processamento Interno da Interface](#back-end-processamento-interno-da-interface)
+- [Bibliografia](#bibliografia)
+- [Pré-Processamento dos Vídeos](#pr%c3%a9-processamento-dos-v%c3%addeos)
+- [Objetivos](#objetivos)
+- [Metodologia](#metodologia)
+- [Técnicas utilizadas](#t%c3%a9cnicas-utilizadas)
+- [Algoritmos](#algoritmos)
+- [Resultados](#resultados)
+- [Referências](#refer%c3%aancias)
+- [Processamento dos Vídeos](#processamento-dos-v%c3%addeos)
+- [Objetivo](#objetivo)
+- [Metodologia](#metodologia-1)
+- [Conclusão](#conclus%c3%a3o)
+- [Apêndice A - Listagem das Equipes](#ap%c3%aandice-a---listagem-das-equipes)
+- [Equipe de Gerência](#equipe-de-ger%c3%aancia)
+- [Equipe de Interface](#equipe-de-interface)
+- [Equipe de Pré-Processamento](#equipe-de-pr%c3%a9-processamento)
+- [Equipe de Processamento](#equipe-de-processamento)
+- [Equipe de Teste e Qualidade](#equipe-de-teste-e-qualidade)
 
 
 ## Introdução
@@ -200,10 +207,14 @@ Acesso em: 10 nov. 2019.
 <p>Primeiramente, são definidas variáveis necessárias para o processamento, tais como as dimensões da imagem, a região delimitada para o processamento e a velocidade da esteira, além da angulação “alfa” padrão das torradas.</p>
 <p>Com isso, são localizadas as torradas na região estabelecida, com base no contorno de cada uma na imagem, utilizando a função cv2.findContours(), onde a função cv2.minAreaRect() é também aplicada para determinar uma região mínima para esse contorno.</p>
 
-## Testes e Resultados
-Colocar alguma coisa aqui
 
 ## Conclusão
+<p>Ao final da execução do projeto, implementação e testes, foi possível concluir a
+eficiência do sistema, atendendo a todos os requisitos de funcionamento e interface. Gerando
+resultados satisfatórios na análise da disposição das torradas na esteira de produção.
+Para trabalhos futuros, a experimentação das técnicas em uma situação real seria o
+próximo passo para o aperfeiçoamento qualitativo do sistema e melhor atingir os objetivos.
+Os resultados seriam melhores sabendo a velocidade, posição e limitações reais da situação.</p>
 
 Colocar alguma coisa aqui
 
