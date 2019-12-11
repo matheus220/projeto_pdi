@@ -32,6 +32,9 @@ def process_data(processing_function, input_queue, output_queue, auxiliary_queue
 
         input_queue.task_done()
 
+web_server_thread = Thread(target=interface.launch_web_server)
+web_server_thread.setDaemon(True)
+web_server_thread.start()
 
 pre_processing_thread = Thread(target=process_data, args=(preprocessing.process, raw_frame_queue, preprocessed_frame_queue))
 pre_processing_thread.setDaemon(True)
@@ -78,7 +81,8 @@ while True:
         ret, frame = input_video.read()
 
         if ret:
-            raw_frame_queue.put(frame)
+            roi = frame[:, 100:250:1]
+            raw_frame_queue.put(roi)
             original_frame_queue.put(frame)
         else:
             break

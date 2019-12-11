@@ -1,0 +1,185 @@
+<html lang="en"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="{{ url_for('static', filename='img/toast.svg') }}">
+
+    <title>Toast Tracker</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+
+<body>
+    <header>
+        <div class="navbar navbar-dark bg-dark box-shadow">
+            <div class="container-fluid d-flex justify-content-between">
+                <a href="#" class="navbar-brand d-flex align-items-center">
+                    <img src="{{ url_for('static', filename='img/toast.svg') }}" width="50px">
+                    <strong style="margin-left: 20px">Toast Tracker</strong>
+                </a>
+                <div style="position: relative;" class="navbar-brand">
+                    <span style="margin-left: 20px">Projeto PDI - 2019.2</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main role="main">
+        <div class="album py-5 bg-light">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12 mb-4">
+                        <div class="card box-shadow">
+                            <div class="d-flex justify-content-around">
+                                <div class="website-infos">
+                                    <h2><span class="counter">300</span></h2>
+                                    <p>Total de torradas</p>
+                                </div>
+                                <div class="website-infos-img">
+                                    <img src="{{ url_for('static', filename='img/count.svg') }}" style="width: 55px; height: auto">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12 mb-4">
+                        <div class="card box-shadow">
+                            <div class="d-flex justify-content-around">
+                                <div class="website-infos">
+                                    <h2><span class="counter">200</span></h2>
+                                    <p>Total de corretas</p>
+                                </div>
+                                <div class="website-infos-img">
+                                    <img src="{{ url_for('static', filename='img/success.svg') }}" style="width: 40px; height: auto; margin-top: 5px;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12 mb-4">
+                        <div class="card box-shadow">
+                            <div class="d-flex justify-content-around">
+                                <div class="website-infos">
+                                    <h2><span class="counter">100</span></h2>
+                                    <p>Total de tortas</p>
+                                </div>
+                                <div class="website-infos-img">
+                                    <img src="{{ url_for('static', filename='img/wrong.svg') }}" style="width: 40px; height: auto; margin-top: 5px;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12 mb-4">
+                        <div class="card box-shadow">
+                            <div class="d-flex justify-content-around">
+                                <div class="website-infos">
+                                    <h2><span class="counter">8 cm/s</span></h2>
+                                    <p>Velocidade</p>
+                                </div>
+                                <div class="website-infos-img">
+                                    <img src="{{ url_for('static', filename='img/velocity.svg') }}" style="width: 50px; height: auto; margin-top: 2px;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" id="items_container">
+                    <div class="col-xl-9 col-lg-12 col-md-12 col-sm-12 col-xs-12 mb-4">
+                        <div class="card box-shadow">
+                            <img src="{{ url_for('video_feed') }}" style="width: 100%; height: auto;">
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-lg-12 col-md-12 col-sm-12 col-xs-12 mb-4">
+                        <div class="h-100">
+                            <div class="h-100 card box-shadow">
+                                <div>
+                                    <strong>Parâmetros do sistema</strong>
+                                </div>
+                                <hr style="margin: 8px 0 30px 0">
+                                <form>
+                                    <div class="form-row">
+                                        <div class="form-group col-xl-12 col-md-6">
+                                            <div class="input-group input-group-sm">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text" id="exampleFormControlSelect1">Fonte</span>
+                                                </div>
+                                                <select class="form-control" id="exampleFormControlSelect1">
+                                                    <option>Câmera real</option>
+                                                    <option>Simulação 1</option>
+                                                    <option>Simulação 2</option>
+                                                    <option>Simulação 3</option>
+                                                    <option>Simulação 4</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-group col-xl-12 col-md-6">
+                                            <div class="input-group input-group-sm">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text" id="inputGroup-sizing-sm">Limiar</span>
+                                                </div>
+                                                <input type="text" class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm" placeholder="ângulo (º)">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <hr style="margin: 2px 0 15px 0">
+                                    <strong style="font-size: 13px  ;">Informações da câmera</strong>
+                                    <div class="form-row" style="margin-top: 10px;">
+                                        <div class="form-group col-md-6">
+                                            <div class="input-group input-group-sm">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text" id="inputFOV">FOV</span>
+                                                </div>
+                                                <input type="text" class="form-control" id="inputFOV" placeholder="field of view">
+                                            </div>
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <div class="input-group input-group-sm">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text" id="inputFPS">FPS</span>
+                                                </div>
+                                                <input type="text" class="form-control" id="inputFPS" placeholder="frames per second">
+                                            </div>
+                                        </div>
+                                        <div class="form-group col-md-12">
+                                            <div class="input-group input-group-sm">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text" id="inputFPS">Distância câmera</span>
+                                                </div>
+                                                <input type="text" class="form-control" id="inputFPS" placeholder="distância (cm)">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <hr style="margin: 2px 0 15px 0">
+                                    <strong style="font-size: 13px;">Informações do objeto</strong>
+                                    <div class="form-row" style="margin-top: 10px;">
+                                        <div class="form-group col-md-12">
+                                            <div class="input-group input-group-sm">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text" id="inputFOV">Tamanho</span>
+                                                </div>
+                                                <input type="text" class="form-control" id="inputWidth" placeholder="width (px)">
+                                                <input type="text" class="form-control" id="inputHeight" placeholder="height (px)">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <hr style="margin: 2px 0 15px 0">
+                                    <div class="text-center">
+                                        <button type="submit" class="btn btn-success pull-right">Iniciar</button>
+                                        <button type="submit" class="btn btn-danger pull-right">Parar</button>
+                                    </div> 
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/jquery-3.4.1.min.js') }}"></script>
+
+</body></html>
