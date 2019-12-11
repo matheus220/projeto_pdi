@@ -4,7 +4,6 @@ import json
 import asyncio
 import logging
 import threading
-import websockets
 
 from flask import Response
 from flask import Flask
@@ -15,13 +14,16 @@ logging.basicConfig()
 image_not_found = cv2.imread(os.path.join("pdiufc", "static", "img", "image-not-found.png"))
 output_frame = image_not_found
 lock = threading.Lock()
+lock_state = threading.Lock()
 app = Flask(__name__)
 
 STATE = {
+    'active': False,
+    'video_src': '',
     'count_tor_tot': 0,
     'count_tor_alvo': 0,
     'count_tor_alvo_tela': 0,
-    'velocity': 0,
+    'velocity': 8,
     'input_video': ['webcam']
 }
 
@@ -37,8 +39,8 @@ def process(processed_data, original_image):
     for t in processed_data['tor_alvo']:
         cm = (int(t[0]), int(t[1]))
         cv2.circle(original_image, cm, 10, (0, 0, 255), -1)
-        cv2.putText(original_image, str(t[2]), (cm[0]-20, cm[1]-20), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2, cv2.LINE_AA)
-        cv2.rectangle(original_image, (cm[0]-20, cm[1]-20), (cm[0]+20, cm[1]+20), (0, 255, 200), 2)
+        cv2.putText(original_image, str(t[2]), (cm[0]+50, cm[1]+10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2, cv2.LINE_AA)
+        cv2.rectangle(original_image, (cm[0]-60, cm[1]-60), (cm[0]+60, cm[1]+60), (0, 255, 200), 2)
 
     cv2.line(original_image, (100, 0), (100, 720), (0, 255, 0), 2)
     cv2.line(original_image, (250, 0), (250, 720), (0, 255, 0), 2)
@@ -49,7 +51,7 @@ def process(processed_data, original_image):
 
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
-    loop.run_until_complete(notify_state)
+    loop.run_until_complete(notify_state())
     loop.close()
 
 
@@ -75,17 +77,29 @@ async def unregister(websocket):
 
 
 async def counter(websocket, path):
+    global STATE
     # register(websocket) sends user_event() to websocket
     await register(websocket)
     try:
         await websocket.send(state_event())
         async for message in websocket:
             data = json.loads(message)
-            if data["action"] == "minus":
-                STATE["value"] -= 1
+            if data["active"]:
+                with lock_state:
+                    STATE["active"] = True
+                    STATE["video_src"] = data["fonte"]
                 await notify_state()
-            elif data["action"] == "plus":
-                STATE["value"] += 1
+            elif not data["active"]:
+                with lock_state:
+                    STATE = {
+                        'active': False,
+                        'video_src': '',
+                        'count_tor_tot': 0,
+                        'count_tor_alvo': 0,
+                        'count_tor_alvo_tela': 0,
+                        'velocity': 8,
+                        'input_video': STATE['input_video']
+                    }
                 await notify_state()
             else:
                 logging.error("unsupported event: {}", data)

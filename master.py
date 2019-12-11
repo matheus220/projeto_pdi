@@ -58,46 +58,51 @@ for file in os.listdir("results"):
         videos.append(file.split('.')[0])
 
 interface.STATE['input_video'] = videos
-'''
-while True:
-    print("\n### Available video sources ###")
-    for i in range(len(videos)):
-        print(str(i+1) + " - " + videos[i])
-    print("###############################")
-    choice = input('\n-> Choose a video source: ')
 
-    try:
-        index = int(choice)-1
-        if index < 0:
-            raise Exception()
 
-        if index == 0:
-            source_name = 0
-        else:
-            source_name = 'results/' + videos[index] + '.avi'
-    except Exception as e:
-        print("=> Invalid option <=\n")
-        continue
+def video_player():
+    while True:
+        with interface.lock_state:
+            active = interface.STATE['active']
+            source_name = interface.STATE['video_src']
 
-    input_video = cv2.VideoCapture(source_name)
-    cv2.namedWindow('output', cv2.WINDOW_AUTOSIZE)
+        if not active:
+            cv2.waitKey(15)
+            continue
+        elif source_name:
+            source_name = os.path.join("results", source_name + '.avi')
+            input_video = cv2.VideoCapture(source_name)
 
-    while(input_video.isOpened()):
-        ret, frame = input_video.read()
+            while(input_video.isOpened()):
+                with interface.lock_state:
+                    if not interface.STATE['active']:
+                        break
 
-        if ret:
-            roi = frame[:, 100:250:1]
-            raw_frame_queue.put(roi)
-            original_frame_queue.put(frame)
-        else:
-            break
+                ret, frame = input_video.read()
 
-        if cv2.waitKey(33) & 0xFF == ord('q'):
-            break
+                if ret:
+                    roi = frame[:, 100:250:1]
+                    raw_frame_queue.put(roi)
+                    original_frame_queue.put(frame)
+                else:
+                    with interface.lock_state:
+                        interface.STATE['active'] = False
+                        interface.STATE['video_src'] = ''
+                    break
 
-    input_video.release()
-    cv2.destroyAllWindows()
-'''
+                if cv2.waitKey(33) & 0xFF == ord('q'):
+                    with interface.lock_state:
+                        interface.STATE['active'] = False
+                        interface.STATE['video_src'] = ''
+                    break
+
+            input_video.release()
+
+
+video_player_thread = Thread(target=video_player)
+video_player_thread.setDaemon(True)
+video_player_thread.start()
+
 start_server = websockets.serve(interface.counter, "127.0.0.1", 6789)
 asyncio.get_event_loop().run_until_complete(start_server)
 asyncio.get_event_loop().run_forever()

@@ -99,77 +99,77 @@
                                     <strong>Parâmetros do sistema</strong>
                                 </div>
                                 <hr style="margin: 8px 0 30px 0">
-                                <form>
-                                    <div class="form-row">
-                                        <div class="form-group col-xl-12 col-md-6">
-                                            <div class="input-group input-group-sm">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text" id="video_input">Fonte</span>
+                                <form action="#" onsubmit="inciar();return false;">
+                                    <fieldset id="fieldset" disabled>
+                                        <div class="form-row">
+                                            <div class="form-group col-xl-12 col-md-6">
+                                                <div class="input-group input-group-sm">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text" id="video_input2">Fonte</span>
+                                                    </div>
+                                                    <select class="form-control video_input" id="video_input">
+                                                        <option>Câmera real</option>
+                                                        <option>Simulação 1</option>
+                                                        <option>Simulação 2</option>
+                                                        <option>Simulação 3</option>
+                                                        <option>Simulação 4</option>
+                                                    </select>
                                                 </div>
-                                                <select class="form-control video_input" id="video_input">
-                                                    <option>Câmera real</option>
-                                                    <option>Simulação 1</option>
-                                                    <option>Simulação 2</option>
-                                                    <option>Simulação 3</option>
-                                                    <option>Simulação 4</option>
-                                                </select>
+                                            </div>
+                                            <div class="form-group col-xl-12 col-md-6">
+                                                <div class="input-group input-group-sm">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text" id="limiar2">Limiar</span>
+                                                    </div>
+                                                    <input type="text" class="form-control" id="limiar" aria-label="Small" aria-describedby="inputGroup-sizing-sm" placeholder="ângulo (º)" required>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div class="form-group col-xl-12 col-md-6">
-                                            <div class="input-group input-group-sm">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text" id="inputGroup-sizing-sm">Limiar</span>
+                                        <hr style="margin: 2px 0 15px 0">
+                                        <strong style="font-size: 13px  ;">Informações da câmera</strong>
+                                        <div class="form-row" style="margin-top: 10px;">
+                                            <div class="form-group col-md-6">
+                                                <div class="input-group input-group-sm">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text" id="fov2">FOV</span>
+                                                    </div>
+                                                    <input type="text" class="form-control" id="fov" placeholder="field of view" required>
                                                 </div>
-                                                <input type="text" class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm" placeholder="ângulo (º)">
+                                            </div>
+                                            <div class="form-group col-md-6">
+                                                <div class="input-group input-group-sm">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text" id="fps2">FPS</span>
+                                                    </div>
+                                                    <input type="text" class="form-control" id="fps" placeholder="frames per second" required>
+                                                </div>
+                                            </div>
+                                            <div class="form-group col-md-12">
+                                                <div class="input-group input-group-sm">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text" id="dist2">Distância câmera</span>
+                                                    </div>
+                                                    <input type="text" class="form-control" id="dist" placeholder="distância (cm)" required>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <hr style="margin: 2px 0 15px 0">
-                                    <strong style="font-size: 13px  ;">Informações da câmera</strong>
-                                    <div class="form-row" style="margin-top: 10px;">
-                                        <div class="form-group col-md-6">
-                                            <div class="input-group input-group-sm">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text" id="inputFOV">FOV</span>
+                                        <hr style="margin: 2px 0 15px 0">
+                                        <strong style="font-size: 13px;">Informações do objeto</strong>
+                                        <div class="form-row" style="margin-top: 10px;">
+                                            <div class="form-group col-md-12">
+                                                <div class="input-group input-group-sm">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text" id="tam">Tamanho</span>
+                                                    </div>
+                                                    <input type="text" class="form-control" id="tam_w" placeholder="width (px)" required>
+                                                    <input type="text" class="form-control" id="tam_h" placeholder="height (px)" required>
                                                 </div>
-                                                <input type="text" class="form-control" id="inputFOV" placeholder="field of view">
                                             </div>
                                         </div>
-                                        <div class="form-group col-md-6">
-                                            <div class="input-group input-group-sm">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text" id="inputFPS">FPS</span>
-                                                </div>
-                                                <input type="text" class="form-control" id="inputFPS" placeholder="frames per second">
-                                            </div>
-                                        </div>
-                                        <div class="form-group col-md-12">
-                                            <div class="input-group input-group-sm">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text" id="inputFPS">Distância câmera</span>
-                                                </div>
-                                                <input type="text" class="form-control" id="inputFPS" placeholder="distância (cm)">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <hr style="margin: 2px 0 15px 0">
-                                    <strong style="font-size: 13px;">Informações do objeto</strong>
-                                    <div class="form-row" style="margin-top: 10px;">
-                                        <div class="form-group col-md-12">
-                                            <div class="input-group input-group-sm">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text" id="inputFOV">Tamanho</span>
-                                                </div>
-                                                <input type="text" class="form-control" id="inputWidth" placeholder="width (px)">
-                                                <input type="text" class="form-control" id="inputHeight" placeholder="height (px)">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <hr style="margin: 2px 0 15px 0">
-                                    <div class="text-center">
-                                        <button type="submit" class="btn btn-success pull-right">Iniciar</button>
-                                        <button type="submit" class="btn btn-danger pull-right">Parar</button>
-                                    </div> 
+                                        <hr style="margin: 2px 0 15px 0">
+                                    </fieldset>
+                                    <button type="submit" id="btn_iniciar" style="width: 100%;" class="btn btn-success">Iniciar</button>
+                                    <button type="button" onclick="parar()" id="btn_parar" style="width: 100%;" class="btn btn-danger">Parar</button>
                                 </form>
                             </div>
                         </div>
@@ -194,8 +194,8 @@
             switch (data.type) {
                 case 'state':
                     count_tor_tot.textContent = data.count_tor_tot;
-                    count_tor_tot_ok.textContent = data.count_tor_alvo;
-                    count_tor_tot_no.textContent = data.count_tor_alvo_tela;
+                    count_tor_tot_ok.textContent = data.count_tor_tot - data.count_tor_alvo;
+                    count_tor_tot_no.textContent = data.count_tor_alvo;
                     velocity.textContent = data.velocity + " cm/s";
 
                     var displayOptions = "";
@@ -203,12 +203,51 @@
                     data.input_video.forEach(src => {
                         displayOptions += "<option>" + src + "</option>";
                     });
-                    video_inputs.innerHTML = displayOptions;            
+                    video_inputs.innerHTML = displayOptions;
+
+                    document.getElementById("fieldset").disabled = data.active;
+
+                    if(data.active) {
+                        document.getElementById("btn_iniciar").style.display = "none";
+                        document.getElementById("btn_parar").style.display = "block";
+                    } else {
+                        document.getElementById("btn_iniciar").style.display = "block";
+                        document.getElementById("btn_parar").style.display = "none";
+                    }
                     break;
                 default:
                     console.error("unsupported event", data);
             }
         };
+
+        var fonte = document.getElementById("video_input")
+        var limiar = document.getElementById("limiar")
+        var fov = document.getElementById("fov")
+        var fps = document.getElementById("fps")
+        var dist = document.getElementById("dist")
+        var tam_w = document.getElementById("tam_w")
+        var tam_h = document.getElementById("tam_h")
+
+        function inciar() {
+
+            obj = {
+                active: true,
+                fonte: fonte.value,
+                limiar: limiar.value,
+                fov: fov.value,
+                fps: fps.value,
+                dist: dist.value,
+                tam_w: tam_w.value,
+                tam_h: tam_h.value
+            }
+            websocket.send(JSON.stringify(obj));
+            return false;
+        }
+
+        function parar() {
+            websocket.send(JSON.stringify({active: false}));
+            return false;
+        }
     </script>
 
 </body></html>
