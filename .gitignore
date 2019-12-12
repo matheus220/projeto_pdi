@@ -1,6 +1,5 @@
 .idea
 venv
-results
 __pycache__
 pdiufc/__pycache__
 scripts/__pycache__
